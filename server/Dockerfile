@@ -9,8 +9,9 @@ COPY package*.json ./
 # Installa dipendenze
 RUN npm ci --only=production
 
-# Copia tutto il codice sorgente
-COPY . .
+# Copia i file specifici
+COPY server.js ./
+COPY public/index.html ./public/
 
 # Espone la porta
 EXPOSE 3888
