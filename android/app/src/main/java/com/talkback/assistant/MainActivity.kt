@@ -25,8 +25,10 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupButtons()
         checkPermissions()
-        // Non avviare automaticamente il servizio per Android 14
-        // startBackgroundService()
+        // Avvia il servizio dopo un breve delay per Android 14
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            startBackgroundService()
+        }, 2000)
     }
     
     private fun initViews() {

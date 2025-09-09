@@ -41,8 +41,12 @@ class AudioCaptureService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Non avviare automaticamente il servizio foreground per Android 14
-        // startForeground(NOTIFICATION_ID, createNotification())
+        // Avvia il servizio foreground solo quando necessario
+        try {
+            startForeground(NOTIFICATION_ID, createNotification())
+        } catch (e: Exception) {
+            Log.e(TAG, "Errore nell'avvio del servizio foreground: ${e.message}")
+        }
         // Non avvia automaticamente la cattura audio
         // L'audio viene attivato solo da remoto
         return START_STICKY
