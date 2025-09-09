@@ -11,8 +11,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3888
-    volumes:
-      - ./server/public:/app/public
     restart: unless-stopped
     networks:
       - talkback-network
