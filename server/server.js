@@ -31,6 +31,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Serve socket.io.js
+app.get('/socket.io/socket.io.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist', 'socket.io.js'));
+});
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log(`Client connesso: ${socket.id}`);
