@@ -9,11 +9,12 @@ COPY package*.json ./
 # Installa dipendenze
 RUN npm ci --only=production
 
-# Copia il codice sorgente
+# Copia tutto il codice sorgente (inclusa directory public)
 COPY . .
 
-# Crea directory per file statici
-RUN mkdir -p public
+# Verifica che i file siano presenti
+RUN ls -la /app/
+RUN ls -la /app/public/
 
 # Espone la porta
 EXPOSE 3888
