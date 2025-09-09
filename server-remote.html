@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalkBack Assistant - Ascolto Remoto</title>
+    <script src="http://ha-cm.kozow.com:3888/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.connected {
+            background-color: #4CAF50;
+        }
+        
+        .status-indicator.disconnected {
+            background-color: #f44336;
+        }
+        
+        .status-indicator.listening {
+            background-color: #FF9800;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+        }
+        
+        .info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .audio-visualizer {
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .audio-bar {
+            width: 4px;
+            background: linear-gradient(to top, #4CAF50, #FFEB3B);
+            margin: 0 2px;
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .server-info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .device-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .device-list h3 {
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .device-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .device-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .device-status {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .device-select-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .device-select-btn:hover {
+            background: linear-gradient(45deg, #1976D2, #1565C0);
+        }
+        
+        .device-select-btn.active {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 TalkBack Assistant</h1>
+        <p class="subtitle">Ascolto Remoto del Microfono</p>
+        
+        <div class="server-info">
+            <strong>Server:</strong> ha-cm.kozow.com:3888<br>
+            <strong>Account:</strong> antonellomigliorelli@gmail.com
+        </div>
+        
+        <div class="status">
+            <div>
+                <span class="status-indicator" id="connectionStatus"></span>
+                <span id="statusText">Connessione in corso...</span>
+            </div>
+            <div style="margin-top: 10px;">
+                <span class="status-indicator" id="androidStatus"></span>
+                <span id="androidText">Verifica dispositivo Android...</span>
+            </div>
+        </div>
+        
+        <div class="device-list" id="deviceList" style="display: none;">
+            <h3>📱 Dispositivi Android Connessi</h3>
+            <div id="devicesContainer"></div>
+        </div>
+        
+        <div class="audio-visualizer" id="audioVisualizer">
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+            <div class="audio-bar"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="start-btn" disabled>
+                ▶️ Avvia Ascolto
+            </button>
+            <button id="stopBtn" class="stop-btn" disabled>
+                ⏹️ Ferma Ascolto
+            </button>
+        </div>
+        
+        <div class="info">
+            <p>Assicurati che l'app Android sia connessa e attiva</p>
+            <p>L'audio verrà riprodotto automaticamente quando disponibile</p>
+        </div>
+    </div>
+
+    <script>
+        class TalkBackClient {
+            constructor() {
+                this.socket = io('http://ha-cm.kozow.com:3888', {
+                    auth: {
+                        email: 'antonellomigliorelli@gmail.com',
+                        password: 'B@stardslave69'
+                    }
+                });
+                this.isListening = false;
+                this.audioContext = null;
+                this.audioBuffer = [];
+                this.audioBars = document.querySelectorAll('.audio-bar');
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupSocketListeners();
+                this.setupUI();
+                this.setupAudioContext();
+            }
+            
+            setupSocketListeners() {
+                this.socket.on('connect', () => {
+                    console.log('Connesso al server');
+                    this.updateConnectionStatus(true);
+                    this.checkAndroidStatus();
+                });
+                
+                this.socket.on('disconnect', () => {
+                    console.log('Disconnesso dal server');
+                    this.updateConnectionStatus(false);
+                });
+                
+                this.socket.on('connect_error', (error) => {
+                    console.error('Errore connessione:', error);
+                    this.updateConnectionStatus(false);
+                });
+                
+                this.socket.on('android_status', (data) => {
+                    this.updateAndroidStatus(data.connected);
+                    if (data.connected) {
+                        document.getElementById('startBtn').disabled = false;
+                    }
+                    if (data.devices) {
+                        this.updateDeviceList(data.devices);
+                    }
+                });
+                
+                this.socket.on('android_devices_updated', (devices) => {
+                    this.updateDeviceList(devices);
+                });
+                
+                this.socket.on('listening_started', (data) => {
+                    if (data.success) {
+                        this.isListening = true;
+                        this.updateListeningStatus(true);
+                        console.log('Ascolto avviato');
+                    } else {
+                        alert('Errore: ' + data.error);
+                    }
+                });
+                
+                this.socket.on('listening_stopped', (data) => {
+                    if (data.success) {
+                        this.isListening = false;
+                        this.updateListeningStatus(false);
+                        console.log('Ascolto fermato');
+                    }
+                });
+                
+                this.socket.on('audio_stream', (audioPacket) => {
+                    this.handleAudioData(audioPacket);
+                });
+            }
+            
+            setupUI() {
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.startListening();
+                });
+                
+                document.getElementById('stopBtn').addEventListener('click', () => {
+                    this.stopListening();
+                });
+            }
+            
+            setupAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error('Errore nell\'inizializzazione AudioContext:', e);
+                }
+            }
+            
+            updateConnectionStatus(connected) {
+                const indicator = document.getElementById('connectionStatus');
+                const text = document.getElementById('statusText');
+                
+                if (connected) {
+                    indicator.className = 'status-indicator connected';
+                    text.textContent = 'Connesso al server';
+                } else {
+                    indicator.className = 'status-indicator disconnected';
+                    text.textContent = 'Disconnesso dal server';
+                }
+            }
+            
+            updateAndroidStatus(connected) {
+                const indicator = document.getElementById('androidStatus');
+                const text = document.getElementById('androidText');
+                
+                if (connected) {
+                    indicator.className = 'status-indicator connected';
+                    text.textContent = 'Dispositivo Android connesso';
+                } else {
+                    indicator.className = 'status-indicator disconnected';
+                    text.textContent = 'Nessun dispositivo Android connesso';
+                }
+            }
+            
+            updateListeningStatus(listening) {
+                const indicator = document.getElementById('androidStatus');
+                const startBtn = document.getElementById('startBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                
+                if (listening) {
+                    indicator.className = 'status-indicator listening';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                } else {
+                    indicator.className = 'status-indicator connected';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }
+            
+            checkAndroidStatus() {
+                this.socket.emit('check_android_status');
+            }
+            
+            updateDeviceList(devices) {
+                const deviceList = document.getElementById('deviceList');
+                const devicesContainer = document.getElementById('devicesContainer');
+                
+                if (devices.length === 0) {
+                    deviceList.style.display = 'none';
+                    return;
+                }
+                
+                deviceList.style.display = 'block';
+                devicesContainer.innerHTML = '';
+                
+                devices.forEach(device => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'device-item';
+                    deviceItem.innerHTML = `
+                        <div>
+                            <div class="device-name">${device.name}</div>
+                            <div class="device-status">ID: ${device.id.substring(0, 8)}...</div>
+                        </div>
+                        <button class="device-select-btn" onclick="talkBackClient.selectDevice('${device.id}')">
+                            Seleziona
+                        </button>
+                    `;
+                    devicesContainer.appendChild(deviceItem);
+                });
+            }
+            
+            selectDevice(deviceId) {
+                // Update button states
+                document.querySelectorAll('.device-select-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.textContent = 'Seleziona';
+                });
+                
+                event.target.classList.add('active');
+                event.target.textContent = 'Attivo';
+                
+                // Store selected device
+                this.selectedDeviceId = deviceId;
+            }
+            
+            startListening() {
+                const deviceId = this.selectedDeviceId || null;
+                this.socket.emit('start_listening', deviceId);
+            }
+            
+            stopListening() {
+                this.socket.emit('stop_listening');
+            }
+            
+            handleAudioData(audioPacket) {
+                if (!this.audioContext || audioPacket.type !== 'audio') return;
+                
+                try {
+                    // Decodifica i dati base64
+                    const audioData = atob(audioPacket.data);
+                    const audioArray = new Uint8Array(audioData.length);
+                    for (let i = 0; i < audioData.length; i++) {
+                        audioArray[i] = audioData.charCodeAt(i);
+                    }
+                    
+                    // Converti in Float32Array per Web Audio API
+                    const audioBuffer = new ArrayBuffer(audioArray.length);
+                    const view = new DataView(audioBuffer);
+                    for (let i = 0; i < audioArray.length; i += 2) {
+                        const sample = (audioArray[i] | (audioArray[i + 1] << 8)) / 32768.0;
+                        view.setFloat32(i / 2, sample, true);
+                    }
+                    
+                    // Crea e riproduce l'audio
+                    const audioBufferSource = this.audioContext.createBufferSource();
+                    const audioBufferNode = this.audioContext.createBuffer(1, audioArray.length / 2, audioPacket.sampleRate);
+                    audioBufferNode.copyToChannel(new Float32Array(view.buffer), 0);
+                    
+                    audioBufferSource.buffer = audioBufferNode;
+                    audioBufferSource.connect(this.audioContext.destination);
+                    audioBufferSource.start();
+                    
+                    // Aggiorna visualizzatore audio
+                    this.updateAudioVisualizer(audioArray);
+                    
+                } catch (e) {
+                    console.error('Errore nella riproduzione audio:', e);
+                }
+            }
+            
+            updateAudioVisualizer(audioData) {
+                // Calcola l'ampiezza media per l'animazione
+                let sum = 0;
+                for (let i = 0; i < audioData.length; i += 2) {
+                    const sample = (audioData[i] | (audioData[i + 1] << 8)) / 32768.0;
+                    sum += Math.abs(sample);
+                }
+                const amplitude = sum / (audioData.length / 2);
+                
+                // Aggiorna le barre audio
+                this.audioBars.forEach((bar, index) => {
+                    const height = Math.max(4, amplitude * 50 * (1 + Math.sin(Date.now() * 0.01 + index) * 0.3));
+                    bar.style.height = height + 'px';
+                });
+            }
+        }
+        
+        // Inizializza l'app quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            window.talkBackClient = new TalkBackClient();
+        });
+    </script>
+</body>
+</html>

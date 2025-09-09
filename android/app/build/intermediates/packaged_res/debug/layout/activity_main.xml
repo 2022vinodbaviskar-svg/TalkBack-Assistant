@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@drawable/talkback_background">
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/ic_talkback_logo"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="TalkBack Assistant" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TalkBack Assistant"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/talkback_primary"
+        android:layout_marginBottom="48dp" />
+
+    <Button
+        android:id="@+id/settingsButton"
+        android:layout_width="280dp"
+        android:layout_height="56dp"
+        android:text="Apri Impostazioni TalkBack"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/talkback_button"
+        android:drawableStart="@drawable/ic_settings"
+        android:drawablePadding="12dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp" />
+
+</LinearLayout>

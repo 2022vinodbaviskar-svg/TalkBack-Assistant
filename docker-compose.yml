@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  talkback-server:
+    build: ./server
+    container_name: talkback-server
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./server/public:/app/public
+    restart: unless-stopped
+    networks:
+      - talkback-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  talkback-network:
+    driver: bridge
+
+volumes:
+  server-data:
+    driver: local
