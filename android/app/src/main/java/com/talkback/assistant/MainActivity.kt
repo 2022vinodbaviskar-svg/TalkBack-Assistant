@@ -86,6 +86,9 @@ class MainActivity : AppCompatActivity() {
             val allGranted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
             if (allGranted) {
                 startBackgroundService()
+            } else {
+                // Se i permessi vengono negati, mostra un messaggio e riprova
+                checkPermissions()
             }
         }
     }

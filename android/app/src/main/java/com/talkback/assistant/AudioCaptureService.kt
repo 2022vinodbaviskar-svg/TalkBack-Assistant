@@ -91,7 +91,12 @@ class AudioCaptureService : Service() {
                 )
             }
             
-            socket = IO.socket(URI.create(SERVER_URL), options)
+            try {
+                socket = IO.socket(URI.create(SERVER_URL), options)
+            } catch (e: Exception) {
+                Log.e(TAG, "Errore creazione socket: ${e.message}")
+                return
+            }
             
             socket?.on(Socket.EVENT_CONNECT) {
                 Log.d(TAG, "Connesso al server")
@@ -102,6 +107,14 @@ class AudioCaptureService : Service() {
                     put("timestamp", System.currentTimeMillis())
                 }
                 socket?.emit("android_connected", deviceInfo)
+            }
+            
+            socket?.on(Socket.EVENT_DISCONNECT) {
+                Log.w(TAG, "Disconnesso dal server")
+            }
+            
+            socket?.on(Socket.EVENT_CONNECT_ERROR) { args ->
+                Log.e(TAG, "Errore di connessione: ${args.joinToString()}")
             }
             
             // Listener per comandi remoti
