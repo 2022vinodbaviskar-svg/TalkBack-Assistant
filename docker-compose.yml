@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   talkback-server:
-    build: ./server
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
     container_name: talkback-server
     ports:
       - "3000:3000"
@@ -24,7 +26,3 @@ services:
 networks:
   talkback-network:
     driver: bridge
-
-volumes:
-  server-data:
-    driver: local

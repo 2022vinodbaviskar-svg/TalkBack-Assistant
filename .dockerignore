@@ -10,3 +10,6 @@ coverage
 .coverage
 .coverage/
 *.log
+android/
+TalkBack-Assistant.apk
+server-remote.html
