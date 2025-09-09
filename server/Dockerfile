@@ -3,11 +3,11 @@ FROM node:18-alpine
 # Crea directory di lavoro
 WORKDIR /app
 
-# Copia package.json
-COPY package.json ./
+# Copia package.json e package-lock.json
+COPY package*.json ./
 
 # Installa dipendenze
-RUN npm install --only=production
+RUN npm ci --only=production
 
 # Copia il codice sorgente
 COPY . .
@@ -16,7 +16,7 @@ COPY . .
 RUN mkdir -p public
 
 # Espone la porta
-EXPOSE 3000
+EXPOSE 3888
 
 # Comando di avvio
 CMD ["npm", "start"]

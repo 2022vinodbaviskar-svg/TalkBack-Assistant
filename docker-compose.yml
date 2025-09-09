@@ -7,17 +7,17 @@ services:
       dockerfile: Dockerfile
     container_name: talkback-server
     ports:
-      - "3000:3000"
+      - "3888:3888"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3888
     volumes:
       - ./server/public:/app/public
     restart: unless-stopped
     networks:
       - talkback-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3888/health"]
       interval: 30s
       timeout: 10s
       retries: 3
