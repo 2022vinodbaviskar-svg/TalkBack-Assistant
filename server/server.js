@@ -25,46 +25,9 @@ const clients = new Map();
 const androidDevices = new Map(); // Store multiple Android devices
 let activeAudioStream = null; // Currently active audio source
 
-// Debug: Log directory structure
-console.log('🔍 DEBUG: Directory structure:');
-console.log('__dirname:', __dirname);
-console.log('public path:', path.join(__dirname, 'public'));
-console.log('index.html path:', path.join(__dirname, 'public', 'index.html'));
-
-// Check if files exist
-const fs = require('fs');
-const publicDir = path.join(__dirname, 'public');
-const indexPath = path.join(__dirname, 'public', 'index.html');
-
-console.log('📁 DEBUG: Checking directories and files:');
-console.log('public directory exists:', fs.existsSync(publicDir));
-console.log('index.html exists:', fs.existsSync(indexPath));
-
-if (fs.existsSync(publicDir)) {
-  console.log('📂 DEBUG: Contents of public directory:');
-  try {
-    const files = fs.readdirSync(publicDir);
-    console.log('Files in public:', files);
-  } catch (err) {
-    console.log('Error reading public directory:', err.message);
-  }
-} else {
-  console.log('❌ DEBUG: public directory does not exist!');
-}
-
 // Serve the web client
 app.get('/', (req, res) => {
-  console.log('🌐 DEBUG: Serving web client request');
-  const filePath = path.join(__dirname, 'public', 'index.html');
-  console.log('🌐 DEBUG: Attempting to serve file:', filePath);
-  console.log('🌐 DEBUG: File exists:', fs.existsSync(filePath));
-  
-  if (!fs.existsSync(filePath)) {
-    console.log('❌ DEBUG: index.html not found!');
-    return res.status(404).send('File not found');
-  }
-  
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Socket.IO connection handling
