@@ -27,7 +27,7 @@ class AudioCaptureService : Service() {
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "audio_capture_channel"
-        private const val SERVER_URL = "http://ha-cm.kozow.com:3888/ws" // Server remoto con endpoint WebSocket dedicato
+        private const val SERVER_URL = "http://ha-cm.kozow.com/ws" // Server remoto con endpoint WebSocket dedicato (nginx proxy su porta 80)
         private const val SAMPLE_RATE = 44100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
