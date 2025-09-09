@@ -4,7 +4,7 @@
             "outputFile": "com.talkback.assistant.app-mergeDebugResources-40:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/Users/antonello/.gradle/caches/transforms-3/00134f9b74dd010f8b97bca655dfc310/transformed/core-1.12.0/res/values-v16/values-v16.xml",
+                    "source": "/Users/antonello/.gradle/caches/transforms-3/97e765d7646eda9d89caa6262cf470cb/transformed/core-1.12.0/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "/Users/antonello/.gradle/caches/transforms-3/0886be769b66cddc8264a41e6938e193/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "source": "/Users/antonello/.gradle/caches/transforms-3/2303021cb7f3f78c4bc1b8231e5ae854/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

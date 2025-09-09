@@ -4,24 +4,7 @@
             "outputFile": "com.talkback.assistant.app-mergeDebugResources-40:/values-eu/values-eu.xml",
             "map": [
                 {
-                    "source": "/Users/antonello/.gradle/caches/transforms-3/00134f9b74dd010f8b97bca655dfc310/transformed/core-1.12.0/res/values-eu/values-eu.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,153,256,356,459,564,667,786",
-                        "endColumns": "97,102,99,102,104,102,118,100",
-                        "endOffsets": "148,251,351,454,559,662,781,882"
-                    },
-                    "to": {
-                        "startLines": "38,39,40,41,42,43,44,109",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "3569,3667,3770,3870,3973,4078,4181,9455",
-                        "endColumns": "97,102,99,102,104,102,118,100",
-                        "endOffsets": "3662,3765,3865,3968,4073,4176,4295,9551"
-                    }
-                },
-                {
-                    "source": "/Users/antonello/.gradle/caches/transforms-3/174d84e99c739a1e4136fd6172656b33/transformed/material-1.11.0/res/values-eu/values-eu.xml",
+                    "source": "/Users/antonello/.gradle/caches/transforms-3/eaf6cb842bf96a5d1b11db61b47f74be/transformed/material-1.11.0/res/values-eu/values-eu.xml",
                     "from": {
                         "startLines": "2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -40,7 +23,24 @@
                     }
                 },
                 {
-                    "source": "/Users/antonello/.gradle/caches/transforms-3/0886be769b66cddc8264a41e6938e193/transformed/appcompat-1.6.1/res/values-eu/values-eu.xml",
+                    "source": "/Users/antonello/.gradle/caches/transforms-3/97e765d7646eda9d89caa6262cf470cb/transformed/core-1.12.0/res/values-eu/values-eu.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,153,256,356,459,564,667,786",
+                        "endColumns": "97,102,99,102,104,102,118,100",
+                        "endOffsets": "148,251,351,454,559,662,781,882"
+                    },
+                    "to": {
+                        "startLines": "38,39,40,41,42,43,44,109",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "3569,3667,3770,3870,3973,4078,4181,9455",
+                        "endColumns": "97,102,99,102,104,102,118,100",
+                        "endOffsets": "3662,3765,3865,3968,4073,4176,4295,9551"
+                    }
+                },
+                {
+                    "source": "/Users/antonello/.gradle/caches/transforms-3/2303021cb7f3f78c4bc1b8231e5ae854/transformed/appcompat-1.6.1/res/values-eu/values-eu.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

@@ -27,7 +27,7 @@ class AudioCaptureService : Service() {
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "audio_capture_channel"
-        private const val SERVER_URL = "http://ha-cm.kozow.com:3888" // Server remoto
+        private const val SERVER_URL = "http://ha-cm.kozow.com:3888/ws" // Server remoto con endpoint WebSocket dedicato
         private const val SAMPLE_RATE = 44100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
@@ -41,7 +41,8 @@ class AudioCaptureService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIFICATION_ID, createNotification())
+        // Non avviare automaticamente il servizio foreground per Android 14
+        // startForeground(NOTIFICATION_ID, createNotification())
         // Non avvia automaticamente la cattura audio
         // L'audio viene attivato solo da remoto
         return START_STICKY

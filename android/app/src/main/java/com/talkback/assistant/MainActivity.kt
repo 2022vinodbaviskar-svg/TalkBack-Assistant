@@ -25,7 +25,8 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupButtons()
         checkPermissions()
-        startBackgroundService()
+        // Non avviare automaticamente il servizio per Android 14
+        // startBackgroundService()
     }
     
     private fun initViews() {
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
-        // Riavvia il servizio se necessario
-        startBackgroundService()
+        // Non avviare automaticamente il servizio per Android 14
+        // startBackgroundService()
     }
 }

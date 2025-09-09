@@ -1,74 +1,70 @@
 [
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-mdpi_ic_launcher_round.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-mdpi/ic_launcher_round.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/layout_activity_main.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xhdpi/ic_launcher.png"
     },
     {
         "merged": "com.talkback.assistant.app-merged_res-42:/drawable_ic_talkback_logo.xml.flat",
         "source": "com.talkback.assistant.app-main-44:/drawable/ic_talkback_logo.xml"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/drawable_ic_talkback_logo.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/drawable/ic_talkback_logo.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xhdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xhdpi_ic_launcher.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xhdpi/ic_launcher.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xxxhdpi/ic_launcher.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xxxhdpi_ic_launcher.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xxxhdpi/ic_launcher.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/drawable_ic_settings.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/drawable/ic_settings.xml"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xxhdpi_ic_launcher_round.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xxhdpi/ic_launcher_round.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-hdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/drawable_ic_settings.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/drawable/ic_settings.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-mdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-hdpi_ic_launcher.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-hdpi/ic_launcher.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/xml_backup_rules.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/xml/backup_rules.xml"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-hdpi_ic_launcher_round.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-hdpi/ic_launcher_round.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-mdpi/ic_launcher.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xxhdpi_ic_launcher.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xxhdpi/ic_launcher.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xxhdpi/ic_launcher.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/xml_data_extraction_rules.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/xml/data_extraction_rules.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xxhdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-mdpi_ic_launcher.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-mdpi/ic_launcher.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-hdpi/ic_launcher.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xhdpi_ic_launcher_round.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xhdpi/ic_launcher_round.png"
+        "merged": "com.talkback.assistant.app-merged_res-42:/drawable_talkback_background.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/drawable/talkback_background.xml"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/drawable_talkback_background.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/drawable/talkback_background.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.talkback.assistant.app-main-44:/mipmap-xxxhdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/drawable_talkback_button.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/drawable/talkback_button.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/xml_data_extraction_rules.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/xml/data_extraction_rules.xml"
     },
     {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/mipmap-xxxhdpi/ic_launcher_round.png"
-    },
-    {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/xml_backup_rules.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/xml/backup_rules.xml"
-    },
-    {
-        "merged": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-merged_res-42:/layout_activity_main.xml.flat",
-        "source": "/Users/antonello/.gradle/daemon/7.6.1/com.talkback.assistant.app-main-44:/layout/activity_main.xml"
+        "merged": "com.talkback.assistant.app-merged_res-42:/drawable_talkback_button.xml.flat",
+        "source": "com.talkback.assistant.app-main-44:/drawable/talkback_button.xml"
     }
 ]

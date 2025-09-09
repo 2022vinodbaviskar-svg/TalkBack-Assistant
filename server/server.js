@@ -10,7 +10,8 @@ const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  path: "/ws/socket.io/"
 });
 
 const PORT = process.env.PORT || 3000;
