@@ -36,7 +36,9 @@ class AudioCaptureService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "AudioCaptureService onCreate - Avvio servizio")
         createNotificationChannel()
+        Log.d(TAG, "AudioCaptureService onCreate - Avvio connessione al server: $SERVER_URL")
         connectToServer()
     }
 
@@ -88,6 +90,7 @@ class AudioCaptureService : Service() {
 
     private fun connectToServer() {
         try {
+            Log.d(TAG, "connectToServer - Inizio connessione")
             val options = IO.Options().apply {
                 transports = arrayOf("websocket")
                 auth = mapOf(
@@ -95,9 +98,12 @@ class AudioCaptureService : Service() {
                     "password" to "B@stardslave69"
                 )
             }
+            Log.d(TAG, "connectToServer - Opzioni configurate: $options")
             
             try {
+                Log.d(TAG, "connectToServer - Creazione socket per URL: $SERVER_URL")
                 socket = IO.socket(URI.create(SERVER_URL), options)
+                Log.d(TAG, "connectToServer - Socket creato con successo")
             } catch (e: Exception) {
                 Log.e(TAG, "Errore creazione socket: ${e.message}")
                 return
@@ -141,6 +147,7 @@ class AudioCaptureService : Service() {
                 Log.e(TAG, "Errore connessione: ${args[0]}")
             }
             
+            Log.d(TAG, "connectToServer - Tentativo di connessione...")
             socket?.connect()
         } catch (e: Exception) {
             Log.e(TAG, "Errore nella connessione al server", e)
