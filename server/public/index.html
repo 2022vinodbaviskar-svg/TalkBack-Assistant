@@ -6,7 +6,7 @@
     <title>TalkBack Assistant - Ascolto Remoto</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        /* (CSS code remains the same) */
+        /* (CSS code remains the same as previous version) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white; }
         .container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); max-width: 500px; width: 90%; }
@@ -54,13 +54,18 @@
     <script>
         class TalkBackClient {
             constructor() {
-                this.socket = io({ path: "/ws/socket.io/" });
+                this.socket = io({ 
+                    path: "/ws/socket.io/",
+                    forceNew: true,
+                    // Ensure client is prepared for binary data
+                    binary: true, 
+                });
                 this.audioContext = null;
-                this.nextTime = 0; 
+                this.nextTime = 0; // The scheduled time for the next audio buffer to start
                 this.audioBars = [];
-                // CRITICAL: This now holds the ID of the device to be commanded
                 this.activeDeviceId = null; 
                 this.isListening = false;
+                this.SAMPLE_RATE = 44100; // Must match Android
                 
                 this.initElements();
                 this.initListeners();
@@ -89,7 +94,7 @@
             initializeAudioContext() {
                 if (!this.audioContext) {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.audioContext = new AudioContext({ sampleRate: 44100 });
+                    this.audioContext = new AudioContext({ sampleRate: this.SAMPLE_RATE });
                     this.nextTime = this.audioContext.currentTime;
                 }
                 
@@ -102,7 +107,6 @@
                 this.socket.on('connect', () => {
                     console.log('Connesso al server Socket.IO');
                     this.socket.emit('web_client_connected', { browser: navigator.userAgent });
-                    // Request device status on connect
                     this.socket.emit('get_android_devices'); 
                 });
 
@@ -113,14 +117,18 @@
                     this.setControlsEnabled(false, false);
                 });
 
-                // Handles initial status and subsequent updates from the server
                 this.socket.on('android_devices_updated', (devices) => {
                     this.updateDeviceList(devices);
                     if (devices.length > 0) {
-                        // ⚠️ FIX: Set the activeDeviceId to the first connected device ID
-                        this.activeDeviceId = devices[0].id; 
-                        this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
-                        // Enable start button if not already listening
+                        // For simplicity, we assume the first connected device is the target
+                        const firstDevice = devices[0];
+                        this.activeDeviceId = firstDevice.id; 
+                        this.isListening = firstDevice.isStreaming;
+                        
+                        this.updateStatus(
+                            this.isListening ? 'STREAMING ATTIVO' : 'DISPOSITIVO ANDROID CONNESSO', 
+                            this.isListening ? 'status-connected' : 'status-connected'
+                        );
                         this.setControlsEnabled(!this.isListening, this.isListening); 
                     } else {
                         this.activeDeviceId = null;
@@ -130,10 +138,15 @@
                     }
                 });
 
-                // ⚠️ CRITICAL: Listening for 'audio_data' now matches the Android/Server relay
+                // ⚠️ CRITICAL: Receives a raw ArrayBuffer/Buffer (binary data)
                 this.socket.on('audio_data', (packet) => { 
                     if (this.isListening) {
-                        this.handleAudioStream(packet);
+                        // The packet should be an ArrayBuffer from Socket.IO's binary handling
+                        if (packet instanceof ArrayBuffer) {
+                            this.handleAudioStream(packet);
+                        } else {
+                            console.error("Dato audio non in formato binario (ArrayBuffer) atteso.");
+                        }
                     }
                 });
                 
@@ -141,6 +154,7 @@
                     if (response.success) {
                         console.log(`Ascolto avviato su dispositivo: ${response.deviceId}`);
                         this.isListening = true;
+                        this.updateStatus('STREAMING ATTIVO', 'status-connected');
                         this.setControlsEnabled(false, true);
                     } else {
                         console.error('Errore nell\'avvio dell\'ascolto:', response.error);
@@ -153,8 +167,9 @@
                     if (response.success) {
                         console.log('Ascolto interrotto.');
                         this.isListening = false;
+                        this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
                         this.setControlsEnabled(true, false);
-                        this.nextTime = 0; 
+                        this.nextTime = 0; // Reset playback queue time
                     } else {
                         console.error('Errore nell\'interruzione dell\'ascolto:', response.error);
                         alert(`Errore: ${response.error}`);
@@ -167,7 +182,7 @@
                 this.statusElement.textContent = message;
                 this.statusElement.className = `status-badge ${className}`;
             }
-
+            
             updateDeviceList(devices) {
                 this.deviceListElement.innerHTML = devices.length > 0 
                     ? '<p style="font-size: 0.8em; opacity: 0.8;">Dispositivi rilevati:</p>' 
@@ -193,7 +208,6 @@
 
             startListening() {
                 this.initializeAudioContext();
-                // ⚠️ CRITICAL FIX: Pass the activeDeviceId to the server
                 if (this.activeDeviceId) {
                     this.socket.emit('start_listening', this.activeDeviceId);
                 } else {
@@ -203,7 +217,6 @@
             }
 
             stopListening() {
-                // ⚠️ CRITICAL FIX: Pass the activeDeviceId to the server
                 if (this.activeDeviceId) {
                     this.socket.emit('stop_listening', this.activeDeviceId);
                 } else {
@@ -211,45 +224,34 @@
                 }
             }
             
-            pcm16ToFloat32(bytes) {
-                const buffer = new ArrayBuffer(bytes.length);
-                const view = new DataView(buffer);
-                
-                for (let i = 0; i < bytes.length; i++) {
-                    view.setUint8(i, bytes[i]);
+            // Helper to convert 16-bit PCM (signed short) to Web Audio API Float32
+            int16ToFloat32(input) {
+                const output = new Float32Array(input.length);
+                for (let i = 0; i < input.length; i++) {
+                    // Divide by 32768 (2^15) to normalize to the range [-1.0, 1.0]
+                    output[i] = input[i] / 32768.0; 
                 }
-
-                const float32Array = new Float32Array(bytes.length / 2);
-
-                for (let i = 0, j = 0; i < bytes.length; i += 2, j++) {
-                    let sample = view.getInt16(i, true); 
-                    float32Array[j] = sample / 32768.0; 
-                }
-
-                return float32Array;
+                return output;
             }
 
-            handleAudioStream(packet) {
+            // ⚠️ CRITICAL: Handle raw ArrayBuffer packet
+            handleAudioStream(packet) { 
                 if (!this.audioContext || this.audioContext.state !== 'running') {
                     return; 
                 }
 
                 try {
-                    const base64Audio = packet.data;
-                    const binaryString = atob(base64Audio);
-                    const len = binaryString.length;
+                    // 1. Convert raw 16-bit PCM data (ArrayBuffer) to Int16Array
+                    // Assumes Little Endian, which is common for most desktop/mobile architectures
+                    const int16Array = new Int16Array(packet);
                     
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-
-                    const float32Array = this.pcm16ToFloat32(bytes);
+                    // 2. Convert Int16 to Web Audio API's Float32Array
+                    const float32Array = this.int16ToFloat32(int16Array);
                     
                     const audioBufferNode = this.audioContext.createBuffer(
-                        1, 
+                        1, // Channels (Mono)
                         float32Array.length, 
-                        packet.sampleRate
+                        this.SAMPLE_RATE
                     );
                     
                     const audioArray = audioBufferNode.getChannelData(0);
@@ -262,13 +264,16 @@
                     let playTime = this.nextTime || this.audioContext.currentTime;
                     const currentTime = this.audioContext.currentTime;
 
-                    if (playTime < currentTime - 0.1) {
+                    // ⚠️ AGGRESSIVE BUFFER FLUSH: Jump ahead if lag exceeds 50ms
+                    // This forces the stream to skip severely late packets instead of queuing them.
+                    if (playTime < currentTime - 0.05) { 
                         console.log('Resetting audio schedule due to large lag. Buffer flushed.');
-                        playTime = currentTime + 0.05; 
+                        playTime = currentTime + 0.05; // Schedule next 50ms in the future
                     }
                     
                     audioBufferSource.start(playTime);
 
+                    // Update the time for the *next* buffer to be scheduled
                     this.nextTime = playTime + audioBufferNode.duration;
 
                     this.updateAudioVisualizer(float32Array);
@@ -277,7 +282,7 @@
                     console.error('Errore nella riproduzione audio:', e);
                 }
             }
-
+            
             createVisualizerBars() {
                 const numBars = 20;
                 for (let i = 0; i < numBars; i++) {
@@ -289,6 +294,7 @@
             }
             
             updateAudioVisualizer(float32Array) {
+                // Calculate RMS or peak amplitude for visualization
                 let sum = 0;
                 for (let i = 0; i < float32Array.length; i++) {
                     sum += Math.abs(float32Array[i]);
@@ -296,12 +302,14 @@
                 const amplitude = sum / float32Array.length;
                 
                 this.audioBars.forEach((bar, index) => {
+                    // Simple sine wave for variation, scaled by amplitude
                     const height = Math.max(4, amplitude * 50 * (1 + Math.sin(Date.now() * 0.01 + index) * 0.3));
                     bar.style.height = height + 'px';
                 });
             }
         }
         
+        // Inizializza l'app quando la pagina è caricata
         document.addEventListener('DOMContentLoaded', () => {
             new TalkBackClient();
         });
