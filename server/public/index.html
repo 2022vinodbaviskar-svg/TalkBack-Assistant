@@ -54,7 +54,17 @@
     <script>
         class TalkBackClient {
             constructor() {
-                this.socket = io({ 
+                // ⚠️ CONFIGURATION: SET YOUR SERVER URL HERE ⚠️
+                // ---------------------------------------------
+                // If you are accessing the page via http://localhost:3000, set this to null.
+                // If you are accessing it via a custom IP/Port (e.g., http://192.168.1.5:3000), 
+                // and are experiencing connection issues, set it explicitly:
+                const CUSTOM_SERVER_URL = null; // Example: "http://192.168.1.5:3000"
+
+                const connectionUrl = CUSTOM_SERVER_URL || `${window.location.protocol}//${window.location.host}`;
+                // ---------------------------------------------
+
+                this.socket = io(connectionUrl, { 
                     path: "/ws/socket.io/",
                     forceNew: true,
                     // Ensure client is prepared for binary data
@@ -106,6 +116,7 @@
             initSocketEvents() {
                 this.socket.on('connect', () => {
                     console.log('Connesso al server Socket.IO');
+                    // Immediately request the current list of devices from the server
                     this.socket.emit('web_client_connected', { browser: navigator.userAgent });
                     this.socket.emit('get_android_devices'); 
                 });
