@@ -266,9 +266,10 @@
     </div>
 
     <script>
-        class TalkBackClient {
+class TalkBackClient {
             constructor() {
                 this.socket = io('https://talkback-assistant.onrender.com', {
+                    path: '/ws/socket.io/', // <--- ADD THIS LINE BACK
                     auth: {
                         email: 'antonellomigliorelli@gmail.com',
                         password: 'B@stardslave69'
@@ -278,6 +279,7 @@
                 this.audioContext = null;
                 this.audioBuffer = [];
                 this.audioBars = document.querySelectorAll('.audio-bar');
+                this.selectedDeviceId = null; // <--- RECOMMENDED: Initialize selection property
                 
                 this.init();
             }
