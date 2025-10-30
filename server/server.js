@@ -11,7 +11,10 @@ const io = socketIo(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
-  path: "/ws/socket.io/"
+  path: "/ws/socket.io/",
+  // ⚠️ CRITICAL: Ensure we use the best transport (WebSocket) and handle binary data efficiently
+  allowEIO3: true,
+  transports: ['websocket', 'polling'] 
 });
 
 const PORT = process.env.PORT || 3000;
@@ -19,11 +22,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Assuming index.html is in a 'public' subdirectory
+app.use(express.static(path.join(__dirname, 'public'))); 
 
-// Store connected clients
+// Store connected clients and devices
 const clients = new Map();
-const androidDevices = new Map(); // Store multiple Android devices
+const androidDevices = new Map(); 
 let activeAudioStream = null; // Currently active audio source (socket object)
 
 // Serve the web client
@@ -31,9 +35,14 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve socket.io.js
+// Serve socket.io.js (needed if not relying on CDN)
 app.get('/socket.io/socket.io.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist', 'socket.io.js'));
+  try {
+      res.sendFile(path.join(__dirname, 'node_modules', 'socket.io', 'client-dist', 'socket.io.js'));
+  } catch (error) {
+      console.error("Error serving socket.io.js. Ensure 'socket.io' is installed in node_modules.", error);
+      res.status(404).send("Socket.IO client library not found. Run 'npm install socket.io'.");
+  }
 });
 
 // Socket.IO connection handling
@@ -45,119 +54,87 @@ io.on('connection', (socket) => {
     console.log('Dispositivo Android connesso:', data);
     const deviceInfo = {
       id: socket.id,
-      name: data.deviceName || `Android Device ${androidDevices.size + 1}`,
-      connected: true,
-      socket: socket,
-      lastSeen: new Date()
+      name: data.deviceName || `Android Device ${socket.id.substring(0, 4)}`,
+      version: data.androidVersion || 'Unknown',
+      timestamp: data.timestamp || Date.now(),
+      isStreaming: false,
+      socket: socket 
     };
-    
-    clients.set(socket.id, { type: 'android', socket, deviceInfo });
     androidDevices.set(socket.id, deviceInfo);
     
-    // If no active stream, set this one as the default active
-    if (!activeAudioStream) {
-      activeAudioStream = socket;
-    }
-    
-    // Notify all web clients about new device
-    const deviceList = Array.from(androidDevices.values()).map(d => ({
-        id: d.id,
-        name: d.name,
-        connected: d.connected,
-        isStreaming: d.socket.id === (activeAudioStream ? activeAudioStream.id : null)
-    }));
-    
-    clients.forEach((client) => {
+    // Notify all web clients about the new device
+    clients.forEach((client, clientId) => {
       if (client.type === 'web' && client.socket.connected) {
-        client.socket.emit('android_devices_updated', deviceList);
+        client.socket.emit('android_devices_updated', Array.from(androidDevices.values()));
       }
     });
   });
   
   // Web client connected
   socket.on('web_client_connected', (data) => {
-    console.log('Client web connesso:', data);
-    clients.set(socket.id, { type: 'web', socket });
-    
-    // Send initial status to the new web client
-    const deviceList = Array.from(androidDevices.values()).map(d => ({
-        id: d.id,
-        name: d.name,
-        connected: d.connected,
-        isStreaming: d.socket.id === (activeAudioStream ? activeAudioStream.id : null)
-    }));
-    socket.emit('android_devices_updated', deviceList);
+    console.log('Client Web connesso:', data);
+    clients.set(socket.id, { type: 'web', socket: socket });
+    // Send current list of Android devices immediately
+    socket.emit('android_devices_updated', Array.from(androidDevices.values()));
   });
   
   // Audio data from Android
-  socket.on('audio_data', (audioPacket) => {
+  // ⚠️ CRITICAL: Expects and relays raw binary data (Buffer)
+  socket.on('audio_data', (audioBuffer) => { 
     // Only relay data from the currently active stream
     if (activeAudioStream && activeAudioStream.id === socket.id) {
-      // Broadcast audio to all web clients
+      // Broadcast raw binary audio to all web clients
       clients.forEach((client) => {
         if (client.type === 'web' && client.socket.connected) {
-          // ⚠️ FIX: Emit 'audio_data' to match web client listener
-          client.socket.emit('audio_data', audioPacket); 
+          client.socket.emit('audio_data', audioBuffer); 
         }
       });
     }
   });
   
   // Start listening request from web client
-  socket.on('start_listening', (deviceId) => { // Expects deviceId argument
-    console.log('Richiesta di avvio ascolto da:', socket.id, 'per dispositivo:', deviceId);
-    
-    const targetDevice = androidDevices.get(deviceId);
-    
-    if (targetDevice && targetDevice.socket.connected) {
-      activeAudioStream = targetDevice.socket; // Set the requested device as active
-      targetDevice.socket.emit('start_recording');
-      socket.emit('listening_started', { success: true, deviceId: targetDevice.socket.id });
-    } else {
-      socket.emit('listening_started', { success: false, error: 'Dispositivo Android non trovato o disconnesso' });
+  socket.on('start_listening', (deviceId) => {
+    const device = androidDevices.get(deviceId);
+    if (!device) {
+      socket.emit('listening_started', { success: false, error: 'Dispositivo Android non trovato.' });
+      return;
     }
+    
+    // Set this device as the active stream
+    activeAudioStream = device.socket;
+    
+    // Send command to Android device to start capture
+    device.socket.emit('start_recording', { webClientId: socket.id });
+    
+    // Update internal state and notify web clients
+    device.isStreaming = true;
+    socket.emit('listening_started', { success: true, deviceId: deviceId });
+    io.emit('android_devices_updated', Array.from(androidDevices.values()));
   });
   
   // Stop listening request from web client
-  socket.on('stop_listening', (deviceId) => { // Expects deviceId argument
-    console.log('Richiesta di fermo ascolto da:', socket.id, 'per dispositivo:', deviceId);
-    
-    const targetDevice = androidDevices.get(deviceId);
-    
-    if (targetDevice && targetDevice.socket.connected) {
-      targetDevice.socket.emit('stop_recording');
-      socket.emit('listening_stopped', { success: true });
-    } else {
-      socket.emit('listening_stopped', { success: false, error: 'Dispositivo Android non trovato o disconnesso' });
+  socket.on('stop_listening', (deviceId) => {
+    const device = androidDevices.get(deviceId);
+    if (!device) {
+      socket.emit('listening_stopped', { success: false, error: 'Dispositivo Android non trovato.' });
+      return;
     }
-  });
-  
-  // Check if Android device is connected (legacy/redundant, but kept)
-  socket.on('check_android_status', () => {
-    const isConnected = androidDevices.size > 0;
-    const deviceList = Array.from(androidDevices.values()).map(d => ({
-        id: d.id,
-        name: d.name,
-        connected: d.connected,
-        isStreaming: d.socket.id === (activeAudioStream ? activeAudioStream.id : null)
-    }));
     
-    socket.emit('android_status', { 
-      connected: isConnected,
-      deviceId: activeAudioStream ? activeAudioStream.id : null,
-      devices: deviceList
-    });
+    // Send command to Android device to stop capture
+    device.socket.emit('stop_recording', { webClientId: socket.id });
+    
+    // Update internal state and notify web clients
+    device.isStreaming = false;
+    if (activeAudioStream && activeAudioStream.id === deviceId) {
+      activeAudioStream = null;
+    }
+    socket.emit('listening_stopped', { success: true, deviceId: deviceId });
+    io.emit('android_devices_updated', Array.from(androidDevices.values()));
   });
   
-  // Get list of connected Android devices (legacy/redundant, but kept)
+  // Get list of connected Android devices (requested by web client on connect)
   socket.on('get_android_devices', () => {
-    const deviceList = Array.from(androidDevices.values()).map(d => ({
-        id: d.id,
-        name: d.name,
-        connected: d.connected,
-        isStreaming: d.socket.id === (activeAudioStream ? activeAudioStream.id : null)
-    }));
-    socket.emit('android_devices_updated', deviceList);
+    socket.emit('android_devices_updated', Array.from(androidDevices.values()));
   });
   
   // Handle disconnection
@@ -168,31 +145,13 @@ io.on('connection', (socket) => {
       androidDevices.delete(socket.id);
       console.log('Dispositivo Android disconnesso:', socket.id);
       
-      // If this was the active stream, switch or clear
+      // If this was the active stream, reset it
       if (activeAudioStream && activeAudioStream.id === socket.id) {
         activeAudioStream = null;
-        // Find another connected Android device to make active
-        for (let [deviceId, device] of androidDevices) {
-          if (device.socket.connected) {
-            activeAudioStream = device.socket;
-            break;
-          }
-        }
       }
       
       // Notify all web clients about device removal
-      const deviceList = Array.from(androidDevices.values()).map(d => ({
-          id: d.id,
-          name: d.name,
-          connected: d.connected,
-          isStreaming: d.socket.id === (activeAudioStream ? activeAudioStream.id : null)
-      }));
-      
-      clients.forEach((client) => {
-        if (client.type === 'web' && client.socket.connected) {
-          client.socket.emit('android_devices_updated', deviceList);
-        }
-      });
+      io.emit('android_devices_updated', Array.from(androidDevices.values()));
     }
     
     clients.delete(socket.id);
