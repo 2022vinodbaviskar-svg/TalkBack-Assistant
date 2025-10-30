@@ -359,53 +359,47 @@
             }
 
             // 🟢 UPDATED METHOD: Uses the new conversion and schedules playback precisely
-            handleAudioStream(packet) {
-                if (!this.audioContext || this.audioContext.state !== 'running') {
-                    console.warn('AudioContext not ready or suspended.');
-                    return; 
-                }
+            {
+    if (!this.audioContext || this.audioContext.state !== 'running') {
+        console.warn('AudioContext not ready or suspended.');
+        return; 
+    }
 
-                try {
-                    const base64Audio = packet.data;
-                    const binaryString = atob(base64Audio);
-                    const len = binaryString.length;
-                    
-                    // 1. Convert binary string to a raw Uint8Array
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
+    try {
+        // ... (steps 1, 2, 3: Decoding and creating audioBufferNode)
+        
+        // 4. Play the audio using improved precise scheduling 🚨 (Modified Block) 🚨
+        const audioBufferSource = this.audioContext.createBufferSource();
+        audioBufferSource.buffer = audioBufferNode;
+        audioBufferSource.connect(this.audioContext.destination);
+        
+        // --- START IMPROVED SCHEDULING ---
+        // 1. Calculate the scheduled play time (nextTime or current time if starting)
+        let playTime = this.nextTime || this.audioContext.currentTime;
+        
+        // 2. Adjust playTime to ensure we don't schedule in the past
+        const currentTime = this.audioContext.currentTime;
 
-                    // 2. Convert the raw bytes (16-bit signed PCM) to 32-bit float array
-                    const float32Array = this.pcm16ToFloat32(bytes);
-                    
-                    // 3. Create and populate the AudioBuffer
-                    const audioBufferNode = this.audioContext.createBuffer(
-                        1, // channels (Mono)
-                        float32Array.length, // frames
-                        packet.sampleRate // Sample rate (should be 44100)
-                    );
-                    
-                    const audioArray = audioBufferNode.getChannelData(0);
-                    audioArray.set(float32Array, 0); // Copy the converted float data
+        // If the scheduled time is significantly behind the current time, 
+        // reset the schedule to the current time, plus a small buffer (e.g., 50ms) 
+        // to avoid trying to play immediately (which causes stutter/overlap).
+        if (playTime < currentTime - 0.1) { // 0.1s tolerance (100ms)
+            playTime = currentTime + 0.05; // Schedule 50ms ahead to buffer
+        }
+        
+        audioBufferSource.start(playTime);
 
-                    // 4. Play the audio using precise scheduling
-                    const audioBufferSource = this.audioContext.createBufferSource();
-                    audioBufferSource.buffer = audioBufferNode;
-                    audioBufferSource.connect(this.audioContext.destination);
-                    
-                    // Schedule the buffer to play right after the previous one finishes
-                    const playTime = this.nextTime || this.audioContext.currentTime;
-                    audioBufferSource.start(playTime);
-                    this.nextTime = playTime + audioBufferNode.duration;
+        // 3. Update the next scheduled time for the next packet
+        this.nextTime = playTime + audioBufferNode.duration;
+        // --- END IMPROVED SCHEDULING ---
 
-                    // 5. Update visualizer 
-                    this.updateAudioVisualizer(float32Array);
-                    
-                } catch (e) {
-                    console.error('Errore nella riproduzione audio:', e);
-                }
-            }
+        // 5. Update visualizer 
+        this.updateAudioVisualizer(float32Array);
+        
+    } catch (e) {
+        console.error('Errore nella riproduzione audio:', e);
+    }
+}
 
             createVisualizerBars() {
                 const numBars = 20;
