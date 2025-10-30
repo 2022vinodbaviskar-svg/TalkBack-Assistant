@@ -91,7 +91,16 @@ class AudioCaptureService : Service() {
     private fun connectToServer() {
         try {
             Log.d(TAG, "connectToServer - Inizio connessione")           
-            val options = IO.Options().apply { transports = arrayOf("websocket") // 🚨 ADD THIS LINE 🚨 path = "/ws/socket.io/" auth = mapOf( "email" to "...", "password" to "..." ) 
+            val options = IO.Options().apply {
+            transports = arrayOf("websocket")
+            
+            // 🚨 ADD THIS CRITICAL LINE 🚨
+            path = "/ws/socket.io/"
+            
+            auth = mapOf(
+                "email" to "antonellomigliorelli@gmail.com",
+                "password" to "B@stardslave69"
+            )
           }
             Log.d(TAG, "connectToServer - Opzioni configurate: $options")
             
