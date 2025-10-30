@@ -56,10 +56,10 @@
             constructor() {
                 this.socket = io({ path: "/ws/socket.io/" });
                 this.audioContext = null;
-                // CRITICAL: nextTime schedules the exact moment the next packet should play.
                 this.nextTime = 0; 
                 this.audioBars = [];
-                this.activeDeviceId = null;
+                // CRITICAL: This now holds the ID of the device to be commanded
+                this.activeDeviceId = null; 
                 this.isListening = false;
                 
                 this.initElements();
@@ -91,15 +91,10 @@
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.audioContext = new AudioContext({ sampleRate: 44100 });
                     this.nextTime = this.audioContext.currentTime;
-                    console.log('AudioContext created.');
                 }
                 
                 if (this.audioContext.state === 'suspended') {
-                    this.audioContext.resume().then(() => {
-                        console.log('AudioContext resumed successfully.');
-                    }).catch(e => {
-                        console.error('Failed to resume AudioContext:', e);
-                    });
+                    this.audioContext.resume();
                 }
             }
 
@@ -107,7 +102,8 @@
                 this.socket.on('connect', () => {
                     console.log('Connesso al server Socket.IO');
                     this.socket.emit('web_client_connected', { browser: navigator.userAgent });
-                    this.socket.emit('check_android_status');
+                    // Request device status on connect
+                    this.socket.emit('get_android_devices'); 
                 });
 
                 this.socket.on('disconnect', () => {
@@ -117,31 +113,25 @@
                     this.setControlsEnabled(false, false);
                 });
 
-                this.socket.on('android_status', (data) => {
-                    this.updateDeviceList(data.devices);
-                    if (data.connected && data.devices.length > 0) {
-                        this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
-                        this.setControlsEnabled(true, false);
-                        this.activeDeviceId = data.deviceId;
-                    } else {
-                        this.updateStatus('NESSUN DISPOSITIVO ANDROID CONNESSO', 'status-disconnected');
-                        this.setControlsEnabled(false, false);
-                        this.activeDeviceId = null;
-                    }
-                });
-                
+                // Handles initial status and subsequent updates from the server
                 this.socket.on('android_devices_updated', (devices) => {
                     this.updateDeviceList(devices);
                     if (devices.length > 0) {
+                        // ⚠️ FIX: Set the activeDeviceId to the first connected device ID
+                        this.activeDeviceId = devices[0].id; 
                         this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
-                        this.setControlsEnabled(true, false);
+                        // Enable start button if not already listening
+                        this.setControlsEnabled(!this.isListening, this.isListening); 
                     } else {
+                        this.activeDeviceId = null;
+                        this.isListening = false;
                         this.updateStatus('NESSUN DISPOSITIVO ANDROID CONNESSO', 'status-disconnected');
                         this.setControlsEnabled(false, false);
                     }
                 });
 
-                this.socket.on('audio_data', (packet) => { // NOTE: Listening for 'audio_data'
+                // ⚠️ CRITICAL: Listening for 'audio_data' now matches the Android/Server relay
+                this.socket.on('audio_data', (packet) => { 
                     if (this.isListening) {
                         this.handleAudioStream(packet);
                     }
@@ -155,6 +145,7 @@
                     } else {
                         console.error('Errore nell\'avvio dell\'ascolto:', response.error);
                         alert(`Errore: ${response.error}`);
+                        this.setControlsEnabled(true, false);
                     }
                 });
 
@@ -163,11 +154,11 @@
                         console.log('Ascolto interrotto.');
                         this.isListening = false;
                         this.setControlsEnabled(true, false);
-                        // Reset nextTime on stop to clear scheduling queue
                         this.nextTime = 0; 
                     } else {
                         console.error('Errore nell\'interruzione dell\'ascolto:', response.error);
                         alert(`Errore: ${response.error}`);
+                        this.setControlsEnabled(false, true);
                     }
                 });
             }
@@ -187,8 +178,8 @@
                     item.className = 'device-item';
                     item.innerHTML = `
                         <span class="device-name">${device.name}</span>
-                        <span class="device-status ${device.id === this.activeDeviceId ? 'active' : 'inactive'}">
-                            ${device.id === this.activeDeviceId ? 'Streaming' : 'Connesso'}
+                        <span class="device-status ${device.isStreaming ? 'active' : 'inactive'}">
+                            ${device.isStreaming ? 'Streaming' : 'Connesso'}
                         </span>
                     `;
                     this.deviceListElement.appendChild(item);
@@ -202,14 +193,24 @@
 
             startListening() {
                 this.initializeAudioContext();
-                this.socket.emit('start_listening', this.activeDeviceId);
+                // ⚠️ CRITICAL FIX: Pass the activeDeviceId to the server
+                if (this.activeDeviceId) {
+                    this.socket.emit('start_listening', this.activeDeviceId);
+                } else {
+                    console.error("Nessun ID di dispositivo Android attivo. Impossibile avviare l'ascolto.");
+                    alert("Si prega di connettere un dispositivo Android per avviare l'ascolto.");
+                }
             }
 
             stopListening() {
-                this.socket.emit('stop_listening');
+                // ⚠️ CRITICAL FIX: Pass the activeDeviceId to the server
+                if (this.activeDeviceId) {
+                    this.socket.emit('stop_listening', this.activeDeviceId);
+                } else {
+                    console.warn("Nessun dispositivo attivo da fermare.");
+                }
             }
             
-            // Converts 16-bit signed PCM (from Android) to 32-bit Float (for Web Audio API)
             pcm16ToFloat32(bytes) {
                 const buffer = new ArrayBuffer(bytes.length);
                 const view = new DataView(buffer);
@@ -221,19 +222,15 @@
                 const float32Array = new Float32Array(bytes.length / 2);
 
                 for (let i = 0, j = 0; i < bytes.length; i += 2, j++) {
-                    // Read 16-bit integer (Little Endian - Android standard)
                     let sample = view.getInt16(i, true); 
-                    // Convert to float range (-1.0 to 1.0)
                     float32Array[j] = sample / 32768.0; 
                 }
 
                 return float32Array;
             }
 
-            // CRITICAL: Handles audio packet decoding and precise scheduling
             handleAudioStream(packet) {
                 if (!this.audioContext || this.audioContext.state !== 'running') {
-                    console.warn('AudioContext not ready or suspended.');
                     return; 
                 }
 
@@ -242,36 +239,29 @@
                     const binaryString = atob(base64Audio);
                     const len = binaryString.length;
                     
-                    // 1. Convert binary string to a raw Uint8Array
                     const bytes = new Uint8Array(len);
                     for (let i = 0; i < len; i++) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
 
-                    // 2. Convert raw bytes (16-bit PCM) to 32-bit float array
                     const float32Array = this.pcm16ToFloat32(bytes);
                     
-                    // 3. Create and populate the AudioBuffer
                     const audioBufferNode = this.audioContext.createBuffer(
-                        1, // channels (Mono)
-                        float32Array.length, // frames
-                        packet.sampleRate // 44100
+                        1, 
+                        float32Array.length, 
+                        packet.sampleRate
                     );
                     
                     const audioArray = audioBufferNode.getChannelData(0);
                     audioArray.set(float32Array, 0); 
 
-                    // 4. Play the audio using precise scheduling (Lag/Jitter compensation)
                     const audioBufferSource = this.audioContext.createBufferSource();
                     audioBufferSource.buffer = audioBufferNode;
                     audioBufferSource.connect(this.audioContext.destination);
                     
-                    // --- START ROBUST SCHEDULING ---
                     let playTime = this.nextTime || this.audioContext.currentTime;
                     const currentTime = this.audioContext.currentTime;
 
-                    // If scheduled time is significantly behind current time (100ms tolerance),
-                    // reset the schedule to current time + 50ms buffer to prevent stuttering.
                     if (playTime < currentTime - 0.1) {
                         console.log('Resetting audio schedule due to large lag. Buffer flushed.');
                         playTime = currentTime + 0.05; 
@@ -279,11 +269,8 @@
                     
                     audioBufferSource.start(playTime);
 
-                    // Update the next scheduled time
                     this.nextTime = playTime + audioBufferNode.duration;
-                    // --- END ROBUST SCHEDULING ---
 
-                    // 5. Update visualizer 
                     this.updateAudioVisualizer(float32Array);
                     
                 } catch (e) {
