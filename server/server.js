@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Store connected clients and devices
 const clients = new Map();
+// ⚠️ Store *only* the socket object directly, using the ID as the key for easy lookup.
 const androidDevices = new Map(); 
 let activeAudioStream = null; // Currently active audio source (socket object)
 
@@ -45,6 +46,22 @@ app.get('/socket.io/socket.io.js', (req, res) => {
   }
 });
 
+// Helper function to get clean device info for web clients
+function getDeviceListForClient() {
+    const list = [];
+    androidDevices.forEach((deviceData) => {
+        // ⚠️ CRITICAL: Only include serializable data (no raw socket object)
+        list.push({
+            id: deviceData.id,
+            name: deviceData.name,
+            version: deviceData.version,
+            timestamp: deviceData.timestamp,
+            isStreaming: deviceData.isStreaming,
+        });
+    });
+    return list;
+}
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log(`Client connesso: ${socket.id}`);
@@ -52,22 +69,22 @@ io.on('connection', (socket) => {
   // Android device connected
   socket.on('android_connected', (data) => {
     console.log('Dispositivo Android connesso:', data);
-    const deviceInfo = {
+    
+    // 1. Create the full device object (including the socket for server use)
+    const fullDeviceInfo = {
       id: socket.id,
       name: data.deviceName || `Android Device ${socket.id.substring(0, 4)}`,
       version: data.androidVersion || 'Unknown',
       timestamp: data.timestamp || Date.now(),
       isStreaming: false,
-      socket: socket 
+      socket: socket // 🚨 We store the raw socket here for internal use
     };
-    androidDevices.set(socket.id, deviceInfo);
     
-    // Notify all web clients about the new device
-    clients.forEach((client, clientId) => {
-      if (client.type === 'web' && client.socket.connected) {
-        client.socket.emit('android_devices_updated', Array.from(androidDevices.values()));
-      }
-    });
+    // 2. Store the full object in the internal map
+    androidDevices.set(socket.id, fullDeviceInfo);
+    
+    // 3. Notify all web clients using the clean list
+    io.emit('android_devices_updated', getDeviceListForClient());
   });
   
   // Web client connected
@@ -75,7 +92,7 @@ io.on('connection', (socket) => {
     console.log('Client Web connesso:', data);
     clients.set(socket.id, { type: 'web', socket: socket });
     // Send current list of Android devices immediately
-    socket.emit('android_devices_updated', Array.from(androidDevices.values()));
+    socket.emit('android_devices_updated', getDeviceListForClient());
   });
   
   // Audio data from Android
@@ -109,7 +126,7 @@ io.on('connection', (socket) => {
     // Update internal state and notify web clients
     device.isStreaming = true;
     socket.emit('listening_started', { success: true, deviceId: deviceId });
-    io.emit('android_devices_updated', Array.from(androidDevices.values()));
+    io.emit('android_devices_updated', getDeviceListForClient());
   });
   
   // Stop listening request from web client
@@ -129,12 +146,12 @@ io.on('connection', (socket) => {
       activeAudioStream = null;
     }
     socket.emit('listening_stopped', { success: true, deviceId: deviceId });
-    io.emit('android_devices_updated', Array.from(androidDevices.values()));
+    io.emit('android_devices_updated', getDeviceListForClient());
   });
   
   // Get list of connected Android devices (requested by web client on connect)
   socket.on('get_android_devices', () => {
-    socket.emit('android_devices_updated', Array.from(androidDevices.values()));
+    socket.emit('android_devices_updated', getDeviceListForClient());
   });
   
   // Handle disconnection
@@ -151,7 +168,7 @@ io.on('connection', (socket) => {
       }
       
       // Notify all web clients about device removal
-      io.emit('android_devices_updated', Array.from(androidDevices.values()));
+      io.emit('android_devices_updated', getDeviceListForClient());
     }
     
     clients.delete(socket.id);
