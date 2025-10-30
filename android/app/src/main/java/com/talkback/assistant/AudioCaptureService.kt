@@ -27,7 +27,7 @@ class AudioCaptureService : Service() {
     companion object {
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "audio_capture_channel"
-        private const val SERVER_URL = "https://talkback-assistant.onrender.com/ws" // Server remoto con endpoint WebSocket dedicato (nginx proxy su porta 80)
+        private const val SERVER_URL = "https://talkback-assistant.onrender.com" // Server remoto con endpoint WebSocket dedicato (nginx proxy su porta 80)
         private const val SAMPLE_RATE = 44100
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
@@ -90,14 +90,9 @@ class AudioCaptureService : Service() {
 
     private fun connectToServer() {
         try {
-            Log.d(TAG, "connectToServer - Inizio connessione")
-            val options = IO.Options().apply {
-                transports = arrayOf("websocket")
-                auth = mapOf(
-                    "email" to "antonellomigliorelli@gmail.com",
-                    "password" to "B@stardslave69"
-                )
-            }
+            Log.d(TAG, "connectToServer - Inizio connessione")           
+            val options = IO.Options().apply { transports = arrayOf("websocket") // 🚨 ADD THIS LINE 🚨 path = "/ws/socket.io/" auth = mapOf( "email" to "...", "password" to "..." ) 
+          }
             Log.d(TAG, "connectToServer - Opzioni configurate: $options")
             
             try {
