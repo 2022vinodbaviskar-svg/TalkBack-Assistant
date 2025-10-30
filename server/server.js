@@ -21,10 +21,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Store connected clients
+// Store connected clients (contains socket object for control)
 const clients = new Map();
-const androidDevices = new Map(); // Store multiple Android devices
-let activeAudioStream = null; // Currently active audio source
+// Store only serializable device info (for broadcasting to web clients)
+const androidDevices = new Map(); 
+let activeAudioStream = null; // Currently active audio source (Socket object)
 
 // Serve the web client
 app.get('/', (req, res) => {
@@ -43,16 +44,24 @@ io.on('connection', (socket) => {
   // Android device connected
   socket.on('android_connected', (data) => {
     console.log('Dispositivo Android connesso:', data);
-    const deviceInfo = {
+    
+    // 🟢 FIX 1: Create a serializable info object (no circular reference)
+    const sharableDeviceInfo = {
       id: socket.id,
       name: data.deviceName || `Android Device ${androidDevices.size + 1}`,
       connected: true,
-      socket: socket,
       lastSeen: new Date()
     };
     
-    clients.set(socket.id, { type: 'android', socket, deviceInfo });
-    androidDevices.set(socket.id, deviceInfo);
+    // Store the full client data (including socket) in the clients map for server control
+    clients.set(socket.id, { 
+        type: 'android', 
+        socket, 
+        deviceInfo: sharableDeviceInfo // Store the clean info
+    });
+    
+    // Store ONLY the serializable info in the androidDevices map (for broadcasting)
+    androidDevices.set(socket.id, sharableDeviceInfo);
     
     // If no active stream, make this one active
     if (!activeAudioStream) {
@@ -62,6 +71,7 @@ io.on('connection', (socket) => {
     // Notify all web clients about new device
     clients.forEach((client, clientId) => {
       if (client.type === 'web' && client.socket.connected) {
+        // Send the clean, serializable Map values
         client.socket.emit('android_devices_updated', Array.from(androidDevices.values()));
       }
     });
@@ -89,17 +99,18 @@ io.on('connection', (socket) => {
   socket.on('start_listening', (deviceId = null) => {
     console.log('Richiesta di avvio ascolto da:', socket.id, 'per dispositivo:', deviceId);
     
-    let targetDevice = activeAudioStream;
+    let targetDeviceSocket = activeAudioStream;
     
     // If specific device requested, use that one
-    if (deviceId && androidDevices.has(deviceId)) {
-      targetDevice = androidDevices.get(deviceId).socket;
-      activeAudioStream = targetDevice;
+    if (deviceId && clients.has(deviceId) && clients.get(deviceId).type === 'android') {
+      // 🟢 FIX 2: Retrieve the socket from the 'clients' map
+      targetDeviceSocket = clients.get(deviceId).socket;
+      activeAudioStream = targetDeviceSocket;
     }
     
-    if (targetDevice && targetDevice.connected) {
-      targetDevice.emit('start_recording');
-      socket.emit('listening_started', { success: true, deviceId: targetDevice.id });
+    if (targetDeviceSocket && targetDeviceSocket.connected) {
+      targetDeviceSocket.emit('start_recording');
+      socket.emit('listening_started', { success: true, deviceId: targetDeviceSocket.id });
     } else {
       socket.emit('listening_started', { success: false, error: 'Nessun dispositivo Android connesso' });
     }
@@ -122,7 +133,7 @@ io.on('connection', (socket) => {
     socket.emit('android_status', { 
       connected: isConnected,
       deviceId: isConnected ? activeAudioStream.id : null,
-      devices: Array.from(androidDevices.values())
+      devices: Array.from(androidDevices.values()) // Safe to serialize
     });
   });
   
@@ -142,10 +153,11 @@ io.on('connection', (socket) => {
       // If this was the active stream, switch to another device
       if (activeAudioStream && activeAudioStream.id === socket.id) {
         activeAudioStream = null;
-        // Find another Android device
-        for (let [deviceId, device] of androidDevices) {
-          if (device.socket.connected) {
-            activeAudioStream = device.socket;
+        
+        // 🟢 FIX 3: Iterate through 'clients' to find the next active Android socket
+        for (let [clientId, clientData] of clients) {
+          if (clientData.type === 'android' && clientData.socket.connected) {
+            activeAudioStream = clientData.socket;
             break;
           }
         }
