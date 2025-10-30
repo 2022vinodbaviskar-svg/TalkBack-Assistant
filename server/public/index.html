@@ -6,150 +6,28 @@
     <title>TalkBack Assistant - Ascolto Remoto</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 500px;
-            width: 90%;
-        }
-        
-        h1 {
-            font-weight: 300;
-            margin-bottom: 20px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 25px;
-            margin-bottom: 30px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-        }
-
-        .status-disconnected {
-            background-color: #e74c3c;
-            box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
-        }
-
-        .status-connected {
-            background-color: #2ecc71;
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
-        }
-        
-        .device-list {
-            margin-bottom: 25px;
-            text-align: left;
-            padding: 10px 0;
-            max-height: 150px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .device-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            font-size: 0.9em;
-        }
-
-        .device-name {
-            font-weight: 500;
-        }
-
-        .device-status {
-            font-size: 0.8em;
-            padding: 4px 8px;
-            border-radius: 12px;
-        }
-        
-        .device-status.active {
-            background-color: #f1c40f;
-            color: #333;
-        }
-
-        .device-status.inactive {
-            background-color: #34495e;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-        }
-
-        .action-button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            font-weight: 600;
-        }
-        
-        #startButton {
-            background-color: #3498db;
-            color: white;
-        }
-
-        #startButton:hover {
-            background-color: #2980b9;
-        }
-
-        #stopButton {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        #stopButton:hover {
-            background-color: #c0392b;
-        }
-
-        .visualizer {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 50px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding-top: 10px;
-        }
-        
-        .audio-bar {
-            width: 8px;
-            height: 4px;
-            background-color: #f1c40f;
-            margin: 0 2px;
-            border-radius: 2px;
-            transition: height 0.05s ease;
-        }
-
+        /* (CSS code remains the same) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white; }
+        .container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); max-width: 500px; width: 90%; }
+        h1 { font-weight: 300; margin-bottom: 20px; }
+        .status-badge { display: inline-block; padding: 8px 15px; border-radius: 25px; margin-bottom: 30px; font-weight: 600; text-transform: uppercase; font-size: 0.9em; transition: all 0.3s ease; }
+        .status-disconnected { background-color: #e74c3c; box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
+        .status-connected { background-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.5); }
+        .device-list { margin-bottom: 25px; text-align: left; padding: 10px 0; max-height: 150px; overflow-y: auto; border-top: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+        .device-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 0.9em; }
+        .device-name { font-weight: 500; }
+        .device-status { font-size: 0.8em; padding: 4px 8px; border-radius: 12px; }
+        .device-status.active { background-color: #f1c40f; color: #333; }
+        .device-status.inactive { background-color: #34495e; }
+        .controls { display: flex; justify-content: space-around; margin-bottom: 30px; }
+        .action-button { padding: 12px 25px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: background-color 0.3s ease, transform 0.1s ease; font-weight: 600; }
+        #startButton { background-color: #3498db; color: white; }
+        #startButton:hover { background-color: #2980b9; }
+        #stopButton { background-color: #e74c3c; color: white; }
+        #stopButton:hover { background-color: #c0392b; }
+        .visualizer { display: flex; justify-content: center; align-items: flex-end; height: 50px; margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 10px; }
+        .audio-bar { width: 8px; height: 4px; background-color: #f1c40f; margin: 0 2px; border-radius: 2px; transition: height 0.05s ease; }
     </style>
 </head>
 <body>
@@ -170,7 +48,7 @@
         </div>
 
         <div class="visualizer" id="audioVisualizer">
-            </div>
+        </div>
     </div>
     
     <script>
@@ -178,7 +56,8 @@
             constructor() {
                 this.socket = io({ path: "/ws/socket.io/" });
                 this.audioContext = null;
-                this.nextTime = 0; // For precise audio scheduling
+                // CRITICAL: nextTime schedules the exact moment the next packet should play.
+                this.nextTime = 0; 
                 this.audioBars = [];
                 this.activeDeviceId = null;
                 this.isListening = false;
@@ -202,15 +81,13 @@
                 this.startButton.addEventListener('click', () => this.startListening());
                 this.stopButton.addEventListener('click', () => this.stopListening());
                 
-                // Event listener to resume AudioContext on user interaction
+                // Resumes AudioContext on user interaction
                 document.addEventListener('click', () => this.initializeAudioContext(), { once: true });
                 document.addEventListener('touchend', () => this.initializeAudioContext(), { once: true });
             }
 
-            // Initializes AudioContext only once, handling the suspended state
             initializeAudioContext() {
                 if (!this.audioContext) {
-                    // Create a new AudioContext (or use the existing one)
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.audioContext = new AudioContext({ sampleRate: 44100 });
                     this.nextTime = this.audioContext.currentTime;
@@ -230,7 +107,6 @@
                 this.socket.on('connect', () => {
                     console.log('Connesso al server Socket.IO');
                     this.socket.emit('web_client_connected', { browser: navigator.userAgent });
-                    // Request current status and device list immediately upon connection
                     this.socket.emit('check_android_status');
                 });
 
@@ -256,7 +132,6 @@
                 
                 this.socket.on('android_devices_updated', (devices) => {
                     this.updateDeviceList(devices);
-                    // Re-check status based on devices
                     if (devices.length > 0) {
                         this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
                         this.setControlsEnabled(true, false);
@@ -266,7 +141,7 @@
                     }
                 });
 
-                this.socket.on('audio_stream', (packet) => {
+                this.socket.on('audio_data', (packet) => { // NOTE: Listening for 'audio_data'
                     if (this.isListening) {
                         this.handleAudioStream(packet);
                     }
@@ -288,6 +163,8 @@
                         console.log('Ascolto interrotto.');
                         this.isListening = false;
                         this.setControlsEnabled(true, false);
+                        // Reset nextTime on stop to clear scheduling queue
+                        this.nextTime = 0; 
                     } else {
                         console.error('Errore nell\'interruzione dell\'ascolto:', response.error);
                         alert(`Errore: ${response.error}`);
@@ -324,8 +201,7 @@
             }
 
             startListening() {
-                this.initializeAudioContext(); // Ensure context is running on button click
-                // Pass the activeDeviceId if you want to target a specific device
+                this.initializeAudioContext();
                 this.socket.emit('start_listening', this.activeDeviceId);
             }
 
@@ -333,12 +209,11 @@
                 this.socket.emit('stop_listening');
             }
             
-            // Correctly converts 16-bit signed PCM to 32-bit Float
+            // Converts 16-bit signed PCM (from Android) to 32-bit Float (for Web Audio API)
             pcm16ToFloat32(bytes) {
                 const buffer = new ArrayBuffer(bytes.length);
                 const view = new DataView(buffer);
                 
-                // Copy bytes into the ArrayBuffer
                 for (let i = 0; i < bytes.length; i++) {
                     view.setUint8(i, bytes[i]);
                 }
@@ -346,18 +221,16 @@
                 const float32Array = new Float32Array(bytes.length / 2);
 
                 for (let i = 0, j = 0; i < bytes.length; i += 2, j++) {
-                    // Read 16-bit integer at current position. Assume Little Endian (true).
+                    // Read 16-bit integer (Little Endian - Android standard)
                     let sample = view.getInt16(i, true); 
-                    
-                    // Convert the 16-bit integer range (-32768 to 32767) to the 
-                    // 32-bit float range (-1.0 to 1.0)
+                    // Convert to float range (-1.0 to 1.0)
                     float32Array[j] = sample / 32768.0; 
                 }
 
                 return float32Array;
             }
 
-            // 🚨 FIX 1: Corrected function signature and implemented robust scheduling 🚨
+            // CRITICAL: Handles audio packet decoding and precise scheduling
             handleAudioStream(packet) {
                 if (!this.audioContext || this.audioContext.state !== 'running') {
                     console.warn('AudioContext not ready or suspended.');
@@ -375,20 +248,20 @@
                         bytes[i] = binaryString.charCodeAt(i);
                     }
 
-                    // 2. Convert the raw bytes (16-bit signed PCM) to 32-bit float array
+                    // 2. Convert raw bytes (16-bit PCM) to 32-bit float array
                     const float32Array = this.pcm16ToFloat32(bytes);
                     
                     // 3. Create and populate the AudioBuffer
                     const audioBufferNode = this.audioContext.createBuffer(
                         1, // channels (Mono)
                         float32Array.length, // frames
-                        packet.sampleRate // Sample rate (should be 44100)
+                        packet.sampleRate // 44100
                     );
                     
                     const audioArray = audioBufferNode.getChannelData(0);
-                    audioArray.set(float32Array, 0); // Copy the converted float data
+                    audioArray.set(float32Array, 0); 
 
-                    // 4. Play the audio using precise scheduling (Lag Fix)
+                    // 4. Play the audio using precise scheduling (Lag/Jitter compensation)
                     const audioBufferSource = this.audioContext.createBufferSource();
                     audioBufferSource.buffer = audioBufferNode;
                     audioBufferSource.connect(this.audioContext.destination);
@@ -400,7 +273,7 @@
                     // If scheduled time is significantly behind current time (100ms tolerance),
                     // reset the schedule to current time + 50ms buffer to prevent stuttering.
                     if (playTime < currentTime - 0.1) {
-                        console.log('Resetting audio schedule due to large lag.');
+                        console.log('Resetting audio schedule due to large lag. Buffer flushed.');
                         playTime = currentTime + 0.05; 
                     }
                     
@@ -428,25 +301,20 @@
                 }
             }
             
-            // Uses the correctly converted Float32Array
             updateAudioVisualizer(float32Array) {
-                // Calculate the amplitude (mean absolute value)
                 let sum = 0;
                 for (let i = 0; i < float32Array.length; i++) {
                     sum += Math.abs(float32Array[i]);
                 }
                 const amplitude = sum / float32Array.length;
                 
-                // Aggiorna le barre audio
                 this.audioBars.forEach((bar, index) => {
-                    // Use a scaling factor (e.g., 50) for visual height
                     const height = Math.max(4, amplitude * 50 * (1 + Math.sin(Date.now() * 0.01 + index) * 0.3));
                     bar.style.height = height + 'px';
                 });
             }
         }
         
-        // Inizializza l'app quando la pagina è caricata
         document.addEventListener('DOMContentLoaded', () => {
             new TalkBackClient();
         });
