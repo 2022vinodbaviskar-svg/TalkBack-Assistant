@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TalkBack Assistant - Ascolto Remoto</title>
-    <script src="http://ha-cm.kozow.com:3888/socket.io/socket.io.js"></script>
+    <script src="https://talkback-assistant.onrender.com/socket.io/socket.io.js"></script>
     <style>
         * {
             margin: 0;
@@ -219,7 +219,7 @@
         <p class="subtitle">Ascolto Remoto del Microfono</p>
         
         <div class="server-info">
-            <strong>Server:</strong> ha-cm.kozow.com:3888<br>
+            <strong>Server:</strong> talkback-assistant.onrender.com<br>
             <strong>Account:</strong> antonellomigliorelli@gmail.com
         </div>
         
@@ -268,7 +268,7 @@
     <script>
         class TalkBackClient {
             constructor() {
-                this.socket = io('http://ha-cm.kozow.com:3888', {
+                this.socket = io('https://talkback-assistant.onrender.com', {
                     auth: {
                         email: 'antonellomigliorelli@gmail.com',
                         password: 'B@stardslave69'
