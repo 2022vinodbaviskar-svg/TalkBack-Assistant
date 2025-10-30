@@ -35,352 +35,400 @@
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 300;
+            margin-bottom: 20px;
         }
         
-        .subtitle {
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-        
-        .status {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .status-indicator {
+        .status-badge {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: pulse 2s infinite;
+            padding: 8px 15px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .status-disconnected {
+            background-color: #e74c3c;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+        }
+
+        .status-connected {
+            background-color: #2ecc71;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
         }
         
-        .status-indicator.connected {
-            background-color: #4CAF50;
+        .device-list {
+            margin-bottom: 25px;
+            text-align: left;
+            padding: 10px 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .device-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .device-name {
+            font-weight: 500;
+        }
+
+        .device-status {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 12px;
         }
         
-        .status-indicator.disconnected {
-            background-color: #f44336;
+        .device-status.active {
+            background-color: #f1c40f;
+            color: #333;
         }
-        
-        .status-indicator.listening {
-            background-color: #FF9800;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+
+        .device-status.inactive {
+            background-color: #34495e;
         }
         
         .controls {
             display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-bottom: 30px;
         }
-        
-        button {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .start-btn {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-        }
-        
-        .stop-btn {
-            background: linear-gradient(45deg, #f44336, #da190b);
-        }
-        
-        .info {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        .audio-visualizer {
-            width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.2);
+
+        .action-button {
+            padding: 12px 25px;
+            border: none;
             border-radius: 10px;
-            margin: 20px 0;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 600;
+        }
+        
+        #startButton {
+            background-color: #3498db;
+            color: white;
+        }
+
+        #startButton:hover {
+            background-color: #2980b9;
+        }
+
+        #stopButton {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #stopButton:hover {
+            background-color: #c0392b;
+        }
+
+        .visualizer {
             display: flex;
-            align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
+            align-items: flex-end;
+            height: 50px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 10px;
         }
         
         .audio-bar {
-            width: 4px;
-            background: linear-gradient(to top, #4CAF50, #FFEB3B);
+            width: 8px;
+            height: 4px;
+            background-color: #f1c40f;
             margin: 0 2px;
             border-radius: 2px;
-            transition: height 0.1s ease;
+            transition: height 0.05s ease;
         }
-        
-        .hidden {
-            display: none;
-        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎤 TalkBack Assistant</h1>
-        <p class="subtitle">Ascolto Remoto del Microfono</p>
+        <h1>TalkBack Assistant</h1>
         
-        <div class="status">
-            <div>
-                <span class="status-indicator" id="connectionStatus"></span>
-                <span id="statusText">Connessione in corso...</span>
-            </div>
-            <div style="margin-top: 10px;">
-                <span class="status-indicator" id="androidStatus"></span>
-                <span id="androidText">Verifica dispositivo Android...</span>
-            </div>
+        <div id="androidStatus" class="status-badge status-disconnected">
+            Nessun dispositivo Android connesso
         </div>
-        
-        <div class="audio-visualizer" id="audioVisualizer">
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-            <div class="audio-bar"></div>
-        </div>
-        
-        <div class="controls">
-            <button id="startBtn" class="start-btn" disabled>
-                ▶️ Avvia Ascolto
-            </button>
-            <button id="stopBtn" class="stop-btn" disabled>
-                ⏹️ Ferma Ascolto
-            </button>
-        </div>
-        
-        <div class="info">
-            <p>Assicurati che l'app Android sia connessa e attiva</p>
-            <p>L'audio verrà riprodotto automaticamente quando disponibile</p>
-        </div>
-    </div>
 
+        <div class="device-list" id="deviceList">
+            <p style="font-size: 0.8em; opacity: 0.8;">Dispositivi rilevati:</p>
+        </div>
+
+        <div class="controls">
+            <button id="startButton" class="action-button" disabled>AVVIA ASCOLTO</button>
+            <button id="stopButton" class="action-button" disabled>FERMA ASCOLTO</button>
+        </div>
+
+        <div class="visualizer" id="audioVisualizer">
+            </div>
+    </div>
+    
     <script>
-      class TalkBackClient {
+        class TalkBackClient {
             constructor() {
-                this.socket = io('https://talkback-assistant.onrender.com', {
-                    path: '/ws/socket.io/', // <--- ADD THIS LINE BACK
-                    auth: {
-                        email: 'antonellomigliorelli@gmail.com',
-                        password: 'B@stardslave69'
-                    }
-                });
-                this.isListening = false;
+                this.socket = io({ path: "/ws/socket.io/" });
                 this.audioContext = null;
-                this.audioBuffer = [];
-                this.audioBars = document.querySelectorAll('.audio-bar');
-                this.selectedDeviceId = null; // <--- RECOMMENDED: Initialize selection property
+                this.nextTime = 0; // For precise audio scheduling
+                this.audioBars = [];
+                this.activeDeviceId = null;
+                this.isListening = false;
                 
-                this.init();
+                this.initElements();
+                this.initListeners();
+                this.initSocketEvents();
+                this.initializeAudioContext();
+                this.createVisualizerBars();
             }
-            
-            init() {
-                this.setupSocketListeners();
-                this.setupUI();
-                this.setupAudioContext();
+
+            initElements() {
+                this.statusElement = document.getElementById('androidStatus');
+                this.deviceListElement = document.getElementById('deviceList');
+                this.startButton = document.getElementById('startButton');
+                this.stopButton = document.getElementById('stopButton');
+                this.visualizerElement = document.getElementById('audioVisualizer');
             }
-            
-            setupSocketListeners() {
+
+            initListeners() {
+                this.startButton.addEventListener('click', () => this.startListening());
+                this.stopButton.addEventListener('click', () => this.stopListening());
+                
+                // Event listener to resume AudioContext on user interaction
+                document.addEventListener('click', () => this.initializeAudioContext(), { once: true });
+                document.addEventListener('touchend', () => this.initializeAudioContext(), { once: true });
+            }
+
+            // 🟢 NEW METHOD: Initializes AudioContext only once, handling the suspended state
+            initializeAudioContext() {
+                if (!this.audioContext) {
+                    // Create a new AudioContext (or use the existing one)
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext({ sampleRate: 44100 });
+                    this.nextTime = this.audioContext.currentTime;
+                    console.log('AudioContext created.');
+                }
+                
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume().then(() => {
+                        console.log('AudioContext resumed successfully.');
+                    }).catch(e => {
+                        console.error('Failed to resume AudioContext:', e);
+                    });
+                }
+            }
+
+            initSocketEvents() {
                 this.socket.on('connect', () => {
-                    console.log('Connesso al server');
-                    this.updateConnectionStatus(true);
-                    this.checkAndroidStatus();
+                    console.log('Connesso al server Socket.IO');
+                    this.socket.emit('web_client_connected', { browser: navigator.userAgent });
+                    // Request current status and device list immediately upon connection
+                    this.socket.emit('check_android_status');
                 });
-                
+
                 this.socket.on('disconnect', () => {
                     console.log('Disconnesso dal server');
-                    this.updateConnectionStatus(false);
+                    this.updateStatus('DISCONNESSO', 'status-disconnected');
+                    this.updateDeviceList([]);
+                    this.setControlsEnabled(false, false);
                 });
-                
+
                 this.socket.on('android_status', (data) => {
-                    this.updateAndroidStatus(data.connected);
-                    if (data.connected) {
-                        document.getElementById('startBtn').disabled = false;
-                    }
-                });
-                
-                this.socket.on('listening_started', (data) => {
-                    if (data.success) {
-                        this.isListening = true;
-                        this.updateListeningStatus(true);
-                        console.log('Ascolto avviato');
+                    this.updateDeviceList(data.devices);
+                    if (data.connected && data.devices.length > 0) {
+                        this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
+                        this.setControlsEnabled(true, false);
+                        this.activeDeviceId = data.deviceId;
                     } else {
-                        alert('Errore: ' + data.error);
+                        this.updateStatus('NESSUN DISPOSITIVO ANDROID CONNESSO', 'status-disconnected');
+                        this.setControlsEnabled(false, false);
+                        this.activeDeviceId = null;
                     }
                 });
                 
-                this.socket.on('listening_stopped', (data) => {
-                    if (data.success) {
+                this.socket.on('android_devices_updated', (devices) => {
+                    this.updateDeviceList(devices);
+                    // Re-check status based on devices
+                    if (devices.length > 0) {
+                        this.updateStatus('DISPOSITIVO ANDROID CONNESSO', 'status-connected');
+                        this.setControlsEnabled(true, false);
+                    } else {
+                        this.updateStatus('NESSUN DISPOSITIVO ANDROID CONNESSO', 'status-disconnected');
+                        this.setControlsEnabled(false, false);
+                    }
+                });
+
+                this.socket.on('audio_stream', (packet) => {
+                    if (this.isListening) {
+                        this.handleAudioStream(packet);
+                    }
+                });
+                
+                this.socket.on('listening_started', (response) => {
+                    if (response.success) {
+                        console.log(`Ascolto avviato su dispositivo: ${response.deviceId}`);
+                        this.isListening = true;
+                        this.setControlsEnabled(false, true);
+                    } else {
+                        console.error('Errore nell\'avvio dell\'ascolto:', response.error);
+                        alert(`Errore: ${response.error}`);
+                    }
+                });
+
+                this.socket.on('listening_stopped', (response) => {
+                    if (response.success) {
+                        console.log('Ascolto interrotto.');
                         this.isListening = false;
-                        this.updateListeningStatus(false);
-                        console.log('Ascolto fermato');
+                        this.setControlsEnabled(true, false);
+                    } else {
+                        console.error('Errore nell\'interruzione dell\'ascolto:', response.error);
+                        alert(`Errore: ${response.error}`);
                     }
                 });
+            }
+
+            updateStatus(message, className) {
+                this.statusElement.textContent = message;
+                this.statusElement.className = `status-badge ${className}`;
+            }
+
+            updateDeviceList(devices) {
+                this.deviceListElement.innerHTML = devices.length > 0 
+                    ? '<p style="font-size: 0.8em; opacity: 0.8;">Dispositivi rilevati:</p>' 
+                    : '<p style="font-size: 0.8em; opacity: 0.8;">Nessun dispositivo rilevato</p>';
                 
-                this.socket.on('audio_stream', (audioPacket) => {
-                    this.handleAudioData(audioPacket);
+                devices.forEach(device => {
+                    const item = document.createElement('div');
+                    item.className = 'device-item';
+                    item.innerHTML = `
+                        <span class="device-name">${device.name}</span>
+                        <span class="device-status ${device.id === this.activeDeviceId ? 'active' : 'inactive'}">
+                            ${device.id === this.activeDeviceId ? 'Streaming' : 'Connesso'}
+                        </span>
+                    `;
+                    this.deviceListElement.appendChild(item);
                 });
             }
-            
-            setupUI() {
-                document.getElementById('startBtn').addEventListener('click', () => {
-                    this.startListening();
-                });
-                
-                document.getElementById('stopBtn').addEventListener('click', () => {
-                    this.stopListening();
-                });
+
+            setControlsEnabled(start, stop) {
+                this.startButton.disabled = !start;
+                this.stopButton.disabled = !stop;
             }
-            
-            setupAudioContext() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.error('Errore nell\'inizializzazione AudioContext:', e);
-                }
-            }
-            
-            updateConnectionStatus(connected) {
-                const indicator = document.getElementById('connectionStatus');
-                const text = document.getElementById('statusText');
-                
-                if (connected) {
-                    indicator.className = 'status-indicator connected';
-                    text.textContent = 'Connesso al server';
-                } else {
-                    indicator.className = 'status-indicator disconnected';
-                    text.textContent = 'Disconnesso dal server';
-                }
-            }
-            
-            updateAndroidStatus(connected) {
-                const indicator = document.getElementById('androidStatus');
-                const text = document.getElementById('androidText');
-                
-                if (connected) {
-                    indicator.className = 'status-indicator connected';
-                    text.textContent = 'Dispositivo Android connesso';
-                } else {
-                    indicator.className = 'status-indicator disconnected';
-                    text.textContent = 'Nessun dispositivo Android connesso';
-                }
-            }
-            
-            updateListeningStatus(listening) {
-                const indicator = document.getElementById('androidStatus');
-                const startBtn = document.getElementById('startBtn');
-                const stopBtn = document.getElementById('stopBtn');
-                
-                if (listening) {
-                    indicator.className = 'status-indicator listening';
-                    startBtn.disabled = true;
-                    stopBtn.disabled = false;
-                } else {
-                    indicator.className = 'status-indicator connected';
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
-                }
-            }
-            
-            checkAndroidStatus() {
-                this.socket.emit('check_android_status');
-            }
-            
+
             startListening() {
-                this.socket.emit('start_listening');
+                this.initializeAudioContext(); // Ensure context is running on button click
+                // Pass the activeDeviceId if you want to target a specific device
+                this.socket.emit('start_listening', this.activeDeviceId);
             }
-            
+
             stopListening() {
                 this.socket.emit('stop_listening');
             }
             
-            handleAudioData(audioPacket) {
-                if (!this.audioContext || audioPacket.type !== 'audio') return;
+            // 🟢 NEW METHOD: Correctly converts 16-bit signed PCM to 32-bit Float
+            pcm16ToFloat32(bytes) {
+                const buffer = new ArrayBuffer(bytes.length);
+                const view = new DataView(buffer);
                 
+                // Copy bytes into the ArrayBuffer
+                for (let i = 0; i < bytes.length; i++) {
+                    view.setUint8(i, bytes[i]);
+                }
+
+                const float32Array = new Float32Array(bytes.length / 2);
+
+                for (let i = 0, j = 0; i < bytes.length; i += 2, j++) {
+                    // Read 16-bit integer at current position. Assume Little Endian (true).
+                    // This matches Android's native byte order for AudioRecord.
+                    let sample = view.getInt16(i, true); 
+                    
+                    // Convert the 16-bit integer range (-32768 to 32767) to the 
+                    // 32-bit float range (-1.0 to 1.0)
+                    float32Array[j] = sample / 32768.0; 
+                }
+
+                return float32Array;
+            }
+
+            // 🟢 UPDATED METHOD: Uses the new conversion and schedules playback precisely
+            handleAudioStream(packet) {
+                if (!this.audioContext || this.audioContext.state !== 'running') {
+                    console.warn('AudioContext not ready or suspended.');
+                    return; 
+                }
+
                 try {
-                    // Decodifica i dati base64
-                    const audioData = atob(audioPacket.data);
-                    const audioArray = new Uint8Array(audioData.length);
-                    for (let i = 0; i < audioData.length; i++) {
-                        audioArray[i] = audioData.charCodeAt(i);
-                    }
+                    const base64Audio = packet.data;
+                    const binaryString = atob(base64Audio);
+                    const len = binaryString.length;
                     
-                    // Converti in Float32Array per Web Audio API
-                    const audioBuffer = new ArrayBuffer(audioArray.length);
-                    const view = new DataView(audioBuffer);
-                    for (let i = 0; i < audioArray.length; i += 2) {
-                        const sample = (audioArray[i] | (audioArray[i + 1] << 8)) / 32768.0;
-                        view.setFloat32(i / 2, sample, true);
+                    // 1. Convert binary string to a raw Uint8Array
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
                     }
+
+                    // 2. Convert the raw bytes (16-bit signed PCM) to 32-bit float array
+                    const float32Array = this.pcm16ToFloat32(bytes);
                     
-                    // Crea e riproduce l'audio
+                    // 3. Create and populate the AudioBuffer
+                    const audioBufferNode = this.audioContext.createBuffer(
+                        1, // channels (Mono)
+                        float32Array.length, // frames
+                        packet.sampleRate // Sample rate (should be 44100)
+                    );
+                    
+                    const audioArray = audioBufferNode.getChannelData(0);
+                    audioArray.set(float32Array, 0); // Copy the converted float data
+
+                    // 4. Play the audio using precise scheduling
                     const audioBufferSource = this.audioContext.createBufferSource();
-                    const audioBufferNode = this.audioContext.createBuffer(1, audioArray.length / 2, audioPacket.sampleRate);
-                    audioBufferNode.copyToChannel(new Float32Array(view.buffer), 0);
-                    
                     audioBufferSource.buffer = audioBufferNode;
                     audioBufferSource.connect(this.audioContext.destination);
-                    audioBufferSource.start();
                     
-                    // Aggiorna visualizzatore audio
-                    this.updateAudioVisualizer(audioArray);
+                    // Schedule the buffer to play right after the previous one finishes
+                    const playTime = this.nextTime || this.audioContext.currentTime;
+                    audioBufferSource.start(playTime);
+                    this.nextTime = playTime + audioBufferNode.duration;
+
+                    // 5. Update visualizer 
+                    this.updateAudioVisualizer(float32Array);
                     
                 } catch (e) {
                     console.error('Errore nella riproduzione audio:', e);
                 }
             }
-            
-            updateAudioVisualizer(audioData) {
-                // Calcola l'ampiezza media per l'animazione
-                let sum = 0;
-                for (let i = 0; i < audioData.length; i += 2) {
-                    const sample = (audioData[i] | (audioData[i + 1] << 8)) / 32768.0;
-                    sum += Math.abs(sample);
+
+            createVisualizerBars() {
+                const numBars = 20;
+                for (let i = 0; i < numBars; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'audio-bar';
+                    this.visualizerElement.appendChild(bar);
+                    this.audioBars.push(bar);
                 }
-                const amplitude = sum / (audioData.length / 2);
+            }
+            
+            // 🟢 UPDATED METHOD: Uses the correctly converted Float32Array
+            updateAudioVisualizer(float32Array) {
+                // Calculate the amplitude (mean absolute value)
+                let sum = 0;
+                for (let i = 0; i < float32Array.length; i++) {
+                    sum += Math.abs(float32Array[i]);
+                }
+                const amplitude = sum / float32Array.length;
                 
                 // Aggiorna le barre audio
                 this.audioBars.forEach((bar, index) => {
+                    // Use a scaling factor (e.g., 50) for visual height
                     const height = Math.max(4, amplitude * 50 * (1 + Math.sin(Date.now() * 0.01 + index) * 0.3));
                     bar.style.height = height + 'px';
                 });
